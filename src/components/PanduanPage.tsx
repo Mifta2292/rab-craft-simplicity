@@ -7,15 +7,40 @@ import panduanInstalasi from '../panduan-instalasi.md?raw';
 import { Download } from 'lucide-react';
 
 const PanduanPage = () => {
-  // Function to generate and download PDF
-  const handleDownloadPDF = () => {
-    // This is a placeholder for PDF generation functionality
-    // In a real application, we would use a library like jspdf or html2pdf
-    // For now, we'll just download the markdown file
+  // Function to generate and download DOC
+  const handleDownloadDOC = () => {
+    // Basic conversion from markdown to simple HTML for DOC format
+    const htmlContent = markdownToHTML(panduanInstalasi);
+    
+    // Create a hidden link element
     const element = document.createElement('a');
-    const file = new Blob([panduanInstalasi], { type: 'text/markdown' });
+    
+    // Convert HTML to a format that can be opened by MS Word
+    // Use a simple HTML wrapper with the necessary meta tags
+    const docContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+            xmlns:w="urn:schemas-microsoft-com:office:word" 
+            xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8">
+        <meta name="ProgId" content="Word.Document">
+        <meta name="Generator" content="Microsoft Word 15">
+        <meta name="Originator" content="Microsoft Word 15">
+      </head>
+      <body>
+        ${htmlContent}
+      </body>
+      </html>
+    `;
+    
+    // Create a Blob containing the HTML with MS Word metadata
+    const file = new Blob([docContent], { type: 'application/msword' });
+    
+    // Set the URL and filename for the download
     element.href = URL.createObjectURL(file);
-    element.download = 'panduan-instalasi-rab-ahsp.md';
+    element.download = 'panduan-instalasi-rab-ahsp.doc';
+    
+    // Trigger the download
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -25,23 +50,23 @@ const PanduanPage = () => {
   const markdownToHTML = (markdown: string) => {
     let html = markdown
       // Convert headers
-      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-6 mb-4">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-5 mb-3">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-4 mb-2">$1</h3>')
+      .replace(/^# (.*$)/gim, '<h1 style="font-size: 24pt; font-weight: bold; margin-top: 20pt; margin-bottom: 10pt">$1</h1>')
+      .replace(/^## (.*$)/gim, '<h2 style="font-size: 18pt; font-weight: bold; margin-top: 16pt; margin-bottom: 8pt">$1</h2>')
+      .replace(/^### (.*$)/gim, '<h3 style="font-size: 14pt; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt">$1</h3>')
       // Convert lists
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-6 list-decimal">$1</li>')
-      .replace(/^- (.*$)/gim, '<li class="ml-6 list-disc">$1</li>')
+      .replace(/^\d+\. (.*$)/gim, '<li style="margin-left: 24pt">$1</li>')
+      .replace(/^- (.*$)/gim, '<li style="margin-left: 24pt">$1</li>')
       // Convert code blocks
-      .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-100 p-4 rounded my-4 overflow-x-auto text-sm"><code>$1</code></pre>')
-      .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
+      .replace(/```([\s\S]*?)```/g, '<pre style="background-color: #f5f5f5; padding: 10pt; border-radius: 4pt; font-family: Consolas, monospace; white-space: pre-wrap;"><code>$1</code></pre>')
+      .replace(/`([^`]+)`/g, '<code style="font-family: Consolas, monospace; background-color: #f5f5f5; padding: 2pt;">$1</code>')
       // Convert paragraphs
-      .replace(/^(?!<h|<li|<pre|<code)(.*$)/gim, '<p class="my-2">$1</p>')
+      .replace(/^(?!<h|<li|<pre|<code)(.*$)/gim, '<p style="margin-top: 8pt; margin-bottom: 8pt">$1</p>')
       // Convert links
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-600 hover:underline">$1</a>');
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: #0066cc; text-decoration: underline;">$1</a>');
     
     // Replace consecutive list items with ul or ol tags
-    html = html.replace(/<li class="ml-6 list-disc">([\s\S]*?)(?=<\/li>)<\/li>(?!\s*<li)/g, '<ul class="my-3">$&</ul>');
-    html = html.replace(/<li class="ml-6 list-decimal">([\s\S]*?)(?=<\/li>)<\/li>(?!\s*<li)/g, '<ol class="my-3">$&</ol>');
+    html = html.replace(/<li style="margin-left: 24pt">([\s\S]*?)(?=<\/li>)<\/li>(?!\s*<li)/g, '<ul style="margin-top: 8pt; margin-bottom: 8pt">$&</ul>');
+    html = html.replace(/<li style="margin-left: 24pt">([\s\S]*?)(?=<\/li>)<\/li>(?!\s*<li)/g, '<ol style="margin-top: 8pt; margin-bottom: 8pt">$&</ol>');
     
     return html;
   };
@@ -51,9 +76,9 @@ const PanduanPage = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Panduan Instalasi</h1>
-          <Button onClick={handleDownloadPDF} className="flex items-center gap-2">
+          <Button onClick={handleDownloadDOC} className="flex items-center gap-2">
             <Download size={16} />
-            Download Panduan
+            Download Panduan (DOC)
           </Button>
         </div>
         
