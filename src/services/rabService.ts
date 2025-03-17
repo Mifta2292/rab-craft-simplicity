@@ -1,7 +1,7 @@
 
 import { Rab, RabFormData } from "@/types/rab";
 import { v4 as uuidv4 } from "uuid";
-import * as XLSX from "xlsx";
+import ExcelJS from 'exceljs';
 
 // Simulate database storage with localStorage
 const RAB_STORAGE_KEY = "rab_data";
@@ -83,92 +83,219 @@ export const deleteRab = (id: string): boolean => {
   return updatedList.length < rabList.length;
 };
 
-export const generateExcel = (rab: Rab): void => {
-  // Create workbook and worksheet
-  const workbook = XLSX.utils.book_new();
+export const generateExcel = async (rab: Rab): Promise<void> => {
+  // Create a new workbook
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'RAB AHSP App';
+  workbook.lastModifiedBy = 'RAB AHSP App';
+  workbook.created = new Date();
+  workbook.modified = new Date();
   
-  // Header information
-  const headerData = [
-    ["RAB - Analisa Harga Satuan Pekerjaan"],
-    [""],
-    ["Nama Pekerjaan", rab.nama],
-    ["Kode", rab.kode],
-    ["Satuan", rab.satuan],
-    ["Tanggal", new Date(rab.tanggal).toLocaleDateString()],
-    [""]
-  ];
+  // Add a worksheet
+  const worksheet = workbook.addWorksheet('RAB AHSP');
   
-  // Create AHSP table headers
-  const tableHeaders = ["No", "Uraian", "Satuan", "Koefisien", "Harga Satuan", "Jumlah"];
+  // Add header information
+  worksheet.addRow(['RAB - Analisa Harga Satuan Pekerjaan']);
+  worksheet.addRow([]);
+  worksheet.addRow(['Nama Pekerjaan', rab.nama]);
+  worksheet.addRow(['Kode', rab.kode]);
+  worksheet.addRow(['Satuan', rab.satuan]);
+  worksheet.addRow(['Tanggal', new Date(rab.tanggal).toLocaleDateString()]);
+  worksheet.addRow([]);
+  
+  // Style the title
+  worksheet.getCell('A1').font = { bold: true, size: 14 };
+  worksheet.mergeCells('A1:F1');
   
   // Pekerja section
-  const pekerjaData = [
-    ["A. TENAGA KERJA"],
-    tableHeaders,
-    ...rab.items.pekerja.map((item, index) => [
+  worksheet.addRow(['A. TENAGA KERJA']);
+  worksheet.getCell('A8').font = { bold: true };
+  
+  // Add headers for Pekerja table
+  const headersRow = worksheet.addRow(['No', 'Uraian', 'Satuan', 'Koefisien', 'Harga Satuan', 'Jumlah']);
+  headersRow.eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+  });
+  
+  // Add pekerja data
+  let rowIndex = 10;
+  rab.items.pekerja.forEach((item, index) => {
+    const row = worksheet.addRow([
       index + 1,
       item.nama,
       item.satuan,
       item.koefisien,
       item.hargaSatuan,
       item.jumlah
-    ]),
-    ["", "", "", "", "Jumlah A", rab.items.pekerja.reduce((sum, item) => sum + item.jumlah, 0)],
-    [""]
-  ];
+    ]);
+    
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+    
+    rowIndex++;
+  });
+  
+  // Add pekerja total
+  const pekerjaTotal = rab.items.pekerja.reduce((sum, item) => sum + item.jumlah, 0);
+  const pekerjaRow = worksheet.addRow(['', '', '', '', 'Jumlah A', pekerjaTotal]);
+  pekerjaRow.getCell(5).font = { bold: true };
+  pekerjaRow.getCell(6).font = { bold: true };
+  
+  worksheet.addRow([]);
+  rowIndex += 2;
   
   // Bahan section
-  const bahanData = [
-    ["B. BAHAN"],
-    tableHeaders,
-    ...rab.items.bahan.map((item, index) => [
+  worksheet.addRow(['B. BAHAN']);
+  worksheet.getCell(`A${rowIndex}`).font = { bold: true };
+  rowIndex++;
+  
+  // Add headers for Bahan table
+  const bahanHeadersRow = worksheet.addRow(['No', 'Uraian', 'Satuan', 'Koefisien', 'Harga Satuan', 'Jumlah']);
+  bahanHeadersRow.eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+  });
+  rowIndex++;
+  
+  // Add bahan data
+  rab.items.bahan.forEach((item, index) => {
+    const row = worksheet.addRow([
       index + 1,
       item.nama,
       item.satuan,
       item.koefisien,
       item.hargaSatuan,
       item.jumlah
-    ]),
-    ["", "", "", "", "Jumlah B", rab.items.bahan.reduce((sum, item) => sum + item.jumlah, 0)],
-    [""]
-  ];
+    ]);
+    
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+    
+    rowIndex++;
+  });
+  
+  // Add bahan total
+  const bahanTotal = rab.items.bahan.reduce((sum, item) => sum + item.jumlah, 0);
+  const bahanRow = worksheet.addRow(['', '', '', '', 'Jumlah B', bahanTotal]);
+  bahanRow.getCell(5).font = { bold: true };
+  bahanRow.getCell(6).font = { bold: true };
+  
+  worksheet.addRow([]);
+  rowIndex += 2;
   
   // Alat section
-  const alatData = [
-    ["C. ALAT"],
-    tableHeaders,
-    ...rab.items.alat.map((item, index) => [
+  worksheet.addRow(['C. ALAT']);
+  worksheet.getCell(`A${rowIndex}`).font = { bold: true };
+  rowIndex++;
+  
+  // Add headers for Alat table
+  const alatHeadersRow = worksheet.addRow(['No', 'Uraian', 'Satuan', 'Koefisien', 'Harga Satuan', 'Jumlah']);
+  alatHeadersRow.eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+  });
+  rowIndex++;
+  
+  // Add alat data
+  rab.items.alat.forEach((item, index) => {
+    const row = worksheet.addRow([
       index + 1,
       item.nama,
       item.satuan,
       item.koefisien,
       item.hargaSatuan,
       item.jumlah
-    ]),
-    ["", "", "", "", "Jumlah C", rab.items.alat.reduce((sum, item) => sum + item.jumlah, 0)],
-    [""]
-  ];
+    ]);
+    
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+    
+    rowIndex++;
+  });
   
-  // Total
-  const totalData = [
-    ["TOTAL (A + B + C)", "", "", "", "", rab.totalHarga]
-  ];
+  // Add alat total
+  const alatTotal = rab.items.alat.reduce((sum, item) => sum + item.jumlah, 0);
+  const alatRow = worksheet.addRow(['', '', '', '', 'Jumlah C', alatTotal]);
+  alatRow.getCell(5).font = { bold: true };
+  alatRow.getCell(6).font = { bold: true };
   
-  // Combine all data
-  const allData = [
-    ...headerData,
-    ...pekerjaData,
-    ...bahanData,
-    ...alatData,
-    ...totalData
-  ];
+  worksheet.addRow([]);
+  rowIndex += 2;
   
-  // Create worksheet
-  const worksheet = XLSX.utils.aoa_to_sheet(allData);
+  // Add grand total
+  const totalRow = worksheet.addRow(['TOTAL (A + B + C)', '', '', '', '', rab.totalHarga]);
+  totalRow.getCell(1).font = { bold: true };
+  totalRow.getCell(6).font = { bold: true };
   
-  // Add worksheet to workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, "RAB AHSP");
+  // Auto size columns
+  worksheet.columns.forEach(column => {
+    column.width = 15;
+  });
   
   // Generate Excel file
-  XLSX.writeFile(workbook, `RAB_${rab.kode}_${rab.nama.replace(/\s+/g, "_")}.xlsx`);
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url = window.URL.createObjectURL(blob);
+  
+  // Create a hidden link element
+  const element = document.createElement('a');
+  element.href = url;
+  element.download = `RAB_${rab.kode}_${rab.nama.replace(/\s+/g, "_")}.xlsx`;
+  
+  // Trigger the download
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+  
+  // Clean up
+  window.URL.revokeObjectURL(url);
 };

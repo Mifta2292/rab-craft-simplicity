@@ -5,8 +5,11 @@ import Layout from './Layout';
 import { Button } from './ui/button';
 import panduanInstalasi from '../panduan-instalasi.md?raw';
 import { Download } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const PanduanPage = () => {
+  const { toast } = useToast();
+
   // Function to generate and download DOC
   const handleDownloadDOC = () => {
     // Basic conversion from markdown to simple HTML for DOC format
@@ -44,6 +47,11 @@ const PanduanPage = () => {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+
+    toast({
+      title: "Berhasil mengunduh panduan",
+      description: "Panduan instalasi telah berhasil diunduh",
+    });
   };
 
   // Convert markdown to HTML (basic conversion for display purposes)
