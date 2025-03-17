@@ -10,6 +10,7 @@ const Navbar = () => {
           <Link to="/" className="hover:text-rab-gray transition-colors">Beranda</Link>
           <Link to="/rab" className="hover:text-rab-gray transition-colors">Daftar RAB</Link>
           <Link to="/rab/create" className="hover:text-rab-gray transition-colors">Buat RAB</Link>
+          <Link to="/panduan" className="hover:text-rab-gray transition-colors">Panduan</Link>
         </div>
       </div>
     </nav>
