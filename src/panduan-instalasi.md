@@ -137,7 +137,7 @@ rab-ahsp/
 
 ## 5. Menjalankan Aplikasi
 
-### Development Mode
+### Mode Pengembangan
 1. Buka terminal di root proyek
 2. Jalankan perintah:
 
@@ -147,7 +147,7 @@ npm run dev
 
 3. Buka browser dan akses http://localhost:8080
 
-### Production Build
+### Build Produksi
 1. Buat build produksi dengan perintah:
 
 ```bash

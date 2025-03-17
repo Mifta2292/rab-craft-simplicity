@@ -10,16 +10,16 @@ import { useToast } from '@/hooks/use-toast';
 const PanduanPage = () => {
   const { toast } = useToast();
 
-  // Function to generate and download DOC
+  // Fungsi untuk menghasilkan dan mengunduh DOC
   const handleDownloadDOC = () => {
-    // Basic conversion from markdown to simple HTML for DOC format
+    // Konversi dasar dari markdown ke HTML sederhana untuk format DOC
     const htmlContent = markdownToHTML(panduanInstalasi);
     
-    // Create a hidden link element
+    // Membuat elemen tautan tersembunyi
     const element = document.createElement('a');
     
-    // Convert HTML to a format that can be opened by MS Word
-    // Use a simple HTML wrapper with the necessary meta tags
+    // Mengkonversi HTML ke format yang dapat dibuka oleh MS Word
+    // Gunakan pembungkus HTML sederhana dengan meta tag yang diperlukan
     const docContent = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" 
             xmlns:w="urn:schemas-microsoft-com:office:word" 
@@ -36,14 +36,14 @@ const PanduanPage = () => {
       </html>
     `;
     
-    // Create a Blob containing the HTML with MS Word metadata
+    // Membuat Blob yang berisi HTML dengan metadata MS Word
     const file = new Blob([docContent], { type: 'application/msword' });
     
-    // Set the URL and filename for the download
+    // Mengatur URL dan nama file untuk pengunduhan
     element.href = URL.createObjectURL(file);
     element.download = 'panduan-instalasi-rab-ahsp.doc';
     
-    // Trigger the download
+    // Memicu pengunduhan
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -54,25 +54,25 @@ const PanduanPage = () => {
     });
   };
 
-  // Convert markdown to HTML (basic conversion for display purposes)
+  // Mengkonversi markdown ke HTML (konversi dasar untuk tujuan tampilan)
   const markdownToHTML = (markdown: string) => {
     let html = markdown
-      // Convert headers
+      // Mengkonversi header
       .replace(/^# (.*$)/gim, '<h1 style="font-size: 24pt; font-weight: bold; margin-top: 20pt; margin-bottom: 10pt">$1</h1>')
       .replace(/^## (.*$)/gim, '<h2 style="font-size: 18pt; font-weight: bold; margin-top: 16pt; margin-bottom: 8pt">$1</h2>')
       .replace(/^### (.*$)/gim, '<h3 style="font-size: 14pt; font-weight: bold; margin-top: 14pt; margin-bottom: 6pt">$1</h3>')
-      // Convert lists
+      // Mengkonversi daftar
       .replace(/^\d+\. (.*$)/gim, '<li style="margin-left: 24pt">$1</li>')
       .replace(/^- (.*$)/gim, '<li style="margin-left: 24pt">$1</li>')
-      // Convert code blocks
+      // Mengkonversi blok kode
       .replace(/```([\s\S]*?)```/g, '<pre style="background-color: #f5f5f5; padding: 10pt; border-radius: 4pt; font-family: Consolas, monospace; white-space: pre-wrap;"><code>$1</code></pre>')
       .replace(/`([^`]+)`/g, '<code style="font-family: Consolas, monospace; background-color: #f5f5f5; padding: 2pt;">$1</code>')
-      // Convert paragraphs
+      // Mengkonversi paragraf
       .replace(/^(?!<h|<li|<pre|<code)(.*$)/gim, '<p style="margin-top: 8pt; margin-bottom: 8pt">$1</p>')
-      // Convert links
+      // Mengkonversi tautan
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: #0066cc; text-decoration: underline;">$1</a>');
     
-    // Replace consecutive list items with ul or ol tags
+    // Mengganti item daftar berurutan dengan tag ul atau ol
     html = html.replace(/<li style="margin-left: 24pt">([\s\S]*?)(?=<\/li>)<\/li>(?!\s*<li)/g, '<ul style="margin-top: 8pt; margin-bottom: 8pt">$&</ul>');
     html = html.replace(/<li style="margin-left: 24pt">([\s\S]*?)(?=<\/li>)<\/li>(?!\s*<li)/g, '<ol style="margin-top: 8pt; margin-bottom: 8pt">$&</ol>');
     
@@ -86,7 +86,7 @@ const PanduanPage = () => {
           <h1 className="text-3xl font-bold">Panduan Instalasi</h1>
           <Button onClick={handleDownloadDOC} className="flex items-center gap-2">
             <Download size={16} />
-            Download Panduan (DOC)
+            Unduh Panduan (DOC)
           </Button>
         </div>
         
